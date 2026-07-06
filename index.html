@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MOTION ENGINE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#14110f;
+    --panel:#1c1712;
+    --panel2:#251e17;
+    --line:#3a3128;
+    --amber:#e8a33d;
+    --amber-dim:#8a611f;
+    --cyan:#6fd6e0;
+    --cyan-dim:#3d7178;
+    --text:#ece6db;
+    --text-dim:#9c8f7c;
+    --danger:#d1614a;
+    --danger-dim:#6e3226;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--void);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden;}
+  button{font-family:'Space Grotesk',sans-serif;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:3px;padding:6px 10px;font-size:12px;letter-spacing:.03em;cursor:pointer;transition:background .12s,border-color .12s;}
+  button:hover{background:var(--line);border-color:var(--cyan-dim);}
+  button.active{background:var(--cyan-dim);border-color:var(--cyan);color:#fff;}
+  button:active{transform:translateY(1px);}
+  input[type=number]{width:52px;background:var(--void);border:1px solid var(--line);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:3px;padding:3px 5px;}
+  input[type=text]{background:var(--void);border:1px solid var(--line);color:var(--text);font-size:12px;border-radius:3px;padding:4px 6px;font-family:'Inter',sans-serif;}
+  select{background:var(--void);color:var(--text);border:1px solid var(--line);border-radius:3px;font-size:11px;padding:3px;}
+  label{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
+
+  .app{display:flex;flex-direction:column;height:100vh;}
+
+  .topbar{display:flex;align-items:center;gap:18px;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-shrink:0;}
+  .brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:.08em;color:var(--text);}
+  .brand span{color:var(--amber);}
+  .file-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .spacer{flex:1;}
+  .mode-badge{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);border:1px solid var(--amber-dim);padding:4px 10px;border-radius:3px;letter-spacing:.05em;white-space:nowrap;}
+
+  .workspace{display:flex;flex:1;min-height:0;}
+  .toolrail{width:132px;background:var(--panel);border-right:1px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+  .toolrail .tool{width:100%;text-align:left;}
+  .hint{margin-top:12px;font-size:11px;color:var(--text-dim);line-height:1.5;border-top:1px solid var(--line);padding-top:10px;}
+
+  .stage-wrap{flex:1;position:relative;background:
+      radial-gradient(circle at 30% 20%, #1c1712 0%, #14110f 65%);
+    min-width:0;}
+  #stage{display:block;width:100%;height:100%;cursor:crosshair;}
+  .stage-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:var(--text-dim);font-size:13px;text-align:center;padding:40px;}
+
+  .rightpanel{width:250px;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
+  .tabs{display:flex;border-bottom:1px solid var(--line);}
+  .tab{flex:1;background:none;border:none;border-radius:0;padding:9px;font-size:11px;color:var(--text-dim);border-bottom:2px solid transparent;}
+  .tab.active{color:var(--amber);border-bottom:2px solid var(--amber);}
+  .panel-body{flex:1;overflow-y:auto;padding:8px;}
+  .row-item{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:7px 8px;margin-bottom:6px;font-size:11px;}
+  .row-item.selected{border-color:var(--cyan);}
+  .row-item .rline{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+  .row-item .swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .row-item input[type=text]{flex:1;min-width:0;}
+  .row-item .rmeta{display:flex;justify-content:space-between;align-items:center;gap:6px;color:var(--text-dim);}
+  .icon-btn{background:none;border:none;color:var(--text-dim);padding:2px 5px;font-size:13px;}
+  .icon-btn:hover{color:var(--danger);background:none;border-color:transparent;}
+  .empty-note{color:var(--text-dim);font-size:11px;padding:14px 6px;line-height:1.6;}
+
+  .timeline{background:var(--panel);border-top:1px solid var(--line);flex-shrink:0;padding:8px 14px 10px;}
+  .tl-controls{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap;}
+  .frame-label{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);margin-left:auto;}
+  #ruler{width:100%;height:64px;display:block;cursor:pointer;background:var(--void);border:1px solid var(--line);border-radius:3px;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">MOTION <span>ENGINE</span></div>
+    <div class="file-actions">
+      <button id="btnNew">New</button>
+      <button id="btnSave">Save Project</button>
+      <button id="btnLoad">Load Project</button>
+      <input type="file" id="fileLoad" hidden accept=".json,application/json">
+      <button id="btnImportImg">Import Image</button>
+      <input type="file" id="fileImg" hidden accept="image/*">
+      <button id="btnExportPng">Export Frame PNG</button>
+      <button id="btnExportVideo">Export WebM</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="mode-badge" id="modeBadge">POSE MODE</div>
+  </div>
+
+  <div class="workspace">
+    <div class="toolrail">
+      <button class="tool active" data-tool="select">◎ Pose / Select</button>
+      <button class="tool" data-tool="bone">⌁ Draw Bone</button>
+      <button class="tool" data-tool="sprite">▭ Move Sprite</button>
+      <button class="tool" data-tool="delete">✕ Erase</button>
+      <div class="hint" id="toolHint"></div>
+    </div>
+
+    <div class="stage-wrap">
+      <canvas id="stage"></canvas>
+      <div class="stage-empty" id="stageEmpty" style="display:none;">Draw Bone tool: click and drag to lay down a bone.<br>Click an existing tip first to chain a child bone from it.</div>
+    </div>
+
+    <div class="rightpanel">
+      <div class="tabs">
+        <button class="tab active" data-tab="bones">Rig</button>
+        <button class="tab" data-tab="layers">Layers</button>
+      </div>
+      <div id="panelBones" class="panel-body"></div>
+      <div id="panelLayers" class="panel-body" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-controls">
+      <button id="btnPlay">▶ Play</button>
+      <label>FPS <input id="fpsInput" type="number" value="24" min="1" max="60"></label>
+      <label>Frames <input id="durInput" type="number" value="48" min="2" max="600"></label>
+      <button id="btnKey">◆ Key Selected</button>
+      <button id="btnKeyAll">◆◆ Key All</button>
+      <button id="btnDelKey">Delete Key</button>
+      <span class="frame-label" id="frameLabel">F 0 / 48</span>
+    </div>
+    <canvas id="ruler"></canvas>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ---------- state ----------
+let uidCounter = 1;
+function uid(){ return "id" + (uidCounter++); }
+
+const ACCENTS = ['#6fd6e0','#e8a33d','#9fd66f','#d6836f','#a08fd6','#e0c56f'];
+let accentCursor = 0;
+function nextAccent(){ const c = ACCENTS[accentCursor % ACCENTS.length]; accentCursor++; return c; }
+
+const state = {
+  bones: [],       // {id,name,parentId,length,baseAngle,x,y,color,workingAngle}
+  layers: [],      // {id,name,img,src,x,y,rotation,scale,width,height,boneId,offsetX,offsetY,offsetRot,visible}
+  keyframes: {},   // boneId -> {frame:number -> angle}
+  fps: 24,
+  duration: 48,
+  currentFrame: 0,
+  selectedBoneId: null,
+  selectedLayerId: null,
+  tool: 'select',
+  playing: false,
+};
+
+// ---------- dom ----------
+const stage = document.getElementById('stage');
+const ctx = stage.getContext('2d');
+const ruler = document.getElementById('ruler');
+const rctx = ruler.getContext('2d');
+const stageWrap = document.querySelector('.stage-wrap');
+const stageEmpty = document.getElementById('stageEmpty');
+const modeBadge = document.getElementById('modeBadge');
+const toolHint = document.getElementById('toolHint');
+const frameLabel = document.getElementById('frameLabel');
+const panelBones = document.getElementById('panelBones');
+const panelLayers = document.getElementById('panelLayers');
+
+const HINTS = {
+  select: "Drag a bone's tip to rotate it (FK).\nHold Shift while dragging to solve a 2-bone IK chain with its parent.\nClick a bone to select it for keying.",
+  bone: "Click + drag to place a bone.\nClicking near an existing tip starts a child bone chained to it.\nRelease to finish the bone.",
+  sprite: "Drag a sprite to move it.\nHold Shift + drag to rotate.\nScroll wheel to scale.\nAssign a parent bone in the Layers panel.",
+  delete: "Click a bone to delete it and everything chained below it.\nClick a sprite to remove it.",
+};
+
+function setTool(t){
+  state.tool = t;
+  document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active', b.dataset.tool===t));
+  toolHint.textContent = HINTS[t];
+  modeBadge.textContent = ({select:'POSE MODE',bone:'RIG MODE',sprite:'SPRITE MODE',delete:'ERASE MODE'})[t];
+}
+document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
+setTool('select');
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  panelBones.style.display = t.dataset.tab==='bones' ? 'block':'none';
+  panelLayers.style.display = t.dataset.tab==='layers' ? 'block':'none';
+}));
+
+// ---------- canvas sizing ----------
+function resizeCanvases(){
+  const r = stageWrap.getBoundingClientRect();
+  stage.width = Math.max(200, Math.floor(r.width));
+  stage.height = Math.max(200, Math.floor(r.height));
+  const rr = ruler.getBoundingClientRect();
+  ruler.width = Math.max(200, Math.floor(rr.width));
+  ruler.height = 64;
+  renderAll();
+}
+window.addEventListener('resize', resizeCanvases);
+
+// ---------- geometry helpers ----------
+function dist(x1,y1,x2,y2){ return Math.hypot(x2-x1,y2-y1); }
+function pointToSegDist(px,py,ax,ay,bx,by){
+  const dx=bx-ax, dy=by-ay;
+  const len2 = dx*dx+dy*dy;
+  let t = len2===0 ? 0 : ((px-ax)*dx+(py-ay)*dy)/len2;
+  t = Math.max(0, Math.min(1, t));
+  const cx=ax+dx*t, cy=ay+dy*t;
+  return dist(px,py,cx,cy);
+}
+function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
+
+// ---------- bone math ----------
+function getBoneById(id){ return state.bones.find(b=>b.id===id); }
+function getChildren(id){ return state.bones.filter(b=>b.parentId===id); }
+
+function getKeyedAngle(boneId, frame){
+  const kfs = state.keyframes[boneId];
+  if(!kfs) return 0;
+  const frames = Object.keys(kfs).map(Number).sort((a,b)=>a-b);
+  if(frames.length===0) return 0;
+  if(frame<=frames[0]) return kfs[frames[0]];
+  if(frame>=frames[frames.length-1]) return kfs[frames[frames.length-1]];
+  for(let i=0;i<frames.length-1;i++){
+    if(frame>=frames[i] && frame<=frames[i+1]){
+      const t = (frame-frames[i])/(frames[i+1]-frames[i]);
+      return kfs[frames[i]] + (kfs[frames[i+1]]-kfs[frames[i]])*t;
+    }
+  }
+  return 0;
+}
+
+function applyPoseForFrame(f){
+  state.bones.forEach(b=>{ b.workingAngle = getKeyedAngle(b.id, f); });
+}
+
+// world transform cache, recomputed each render
+function computeWorldTransforms(){
+  const world = {};
+  function computeBone(bone){
+    if(world[bone.id]) return world[bone.id];
+    let rootX, rootY, parentWorldAngle;
+    if(bone.parentId && getBoneById(bone.parentId)){
+      const pt = computeBone(getBoneById(bone.parentId));
+      rootX = pt.tipX; rootY = pt.tipY; parentWorldAngle = pt.worldAngle;
+    } else {
+      rootX = bone.x; rootY = bone.y; parentWorldAngle = 0;
+    }
+    const worldAngle = parentWorldAngle + bone.baseAngle + (bone.workingAngle||0);
+    const tipX = rootX + Math.cos(worldAngle)*bone.length;
+    const tipY = rootY + Math.sin(worldAngle)*bone.length;
+    const t = {x:rootX,y:rootY,tipX,tipY,worldAngle};
+    world[bone.id] = t;
+    return t;
+  }
+  state.bones.forEach(computeBone);
+  return world;
+}
+
+// ---------- rendering ----------
+function renderAll(){
+  renderStage();
+  renderRuler();
+  renderPanels();
+  frameLabel.textContent = "F " + state.currentFrame + " / " + state.duration;
+  stageEmpty.style.display = (state.bones.length===0 && state.layers.length===0) ? 'flex' : 'none';
+}
+
+function renderStage(){
+  const w = stage.width, h = stage.height;
+  ctx.clearRect(0,0,w,h);
+
+  // subtle grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  const grid = 40;
+  for(let x=0;x<w;x+=grid){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=0;y<h;y+=grid){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  const world = computeWorldTransforms();
+
+  // layers (sprites) drawn first
+  state.layers.forEach(layer=>{
+    if(layer.visible===false) return;
+    if(!layer.img || !layer.img.complete || layer.img.naturalWidth===0) return;
+    let x=layer.x, y=layer.y, rot=layer.rotation;
+    if(layer.boneId && world[layer.boneId]){
+      const t = world[layer.boneId];
+      const c = Math.cos(t.worldAngle), s = Math.sin(t.worldAngle);
+      x = t.tipX + (layer.offsetX*c - layer.offsetY*s);
+      y = t.tipY + (layer.offsetX*s + layer.offsetY*c);
+      rot = t.worldAngle + layer.offsetRot;
+    }
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(rot);
+    ctx.scale(layer.scale, layer.scale);
+    ctx.globalAlpha = 1;
+    ctx.drawImage(layer.img, -layer.width/2, -layer.height/2, layer.width, layer.height);
+    if(layer.id===state.selectedLayerId && state.tool==='sprite'){
+      ctx.strokeStyle = '#e8a33d';
+      ctx.lineWidth = 2/layer.scale;
+      ctx.strokeRect(-layer.width/2,-layer.height/2, layer.width, layer.height);
+    }
+    ctx.restore();
+  });
+
+  // bones drawn on top
+  state.bones.forEach(bone=>{
+    const t = world[bone.id];
+    if(!t) return;
+    drawBone(t.x,t.y,t.tipX,t.tipY,bone.color, bone.id===state.selectedBoneId, bone.length);
+  });
+
+  if(state.tool==='bone' && creating){
+    drawBone(creating.rootX, creating.rootY, creating.curX, creating.curY, '#ffffff', true, dist(creating.rootX,creating.rootY,creating.curX,creating.curY), true);
+  }
+}
+
+function drawBone(rx,ry,tx,ty,color,selected,length,ghost){
+  const dx=tx-rx, dy=ty-ry;
+  const len = Math.hypot(dx,dy) || 1;
+  const nx = -dy/len, ny = dx/len;
+  const w = clamp(len*0.12, 4, 16);
+  const midT = 0.16;
+  const mx = rx + dx*midT, my = ry + dy*midT;
+
+  ctx.beginPath();
+  ctx.moveTo(rx,ry);
+  ctx.lineTo(mx + nx*w, my + ny*w);
+  ctx.lineTo(tx,ty);
+  ctx.lineTo(mx - nx*w, my - ny*w);
+  ctx.closePath();
+  ctx.fillStyle = ghost ? 'rgba(255,255,255,0.15)' : (color + (selected?'':'cc'));
+  ctx.globalAlpha = ghost ? 0.6 : 0.85;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = selected ? '#ffffff' : color;
+  ctx.lineWidth = selected ? 2 : 1;
+  ctx.stroke();
+
+  // root joint
+  ctx.beginPath();
+  ctx.arc(rx,ry, selected?6:4.5, 0, Math.PI*2);
+  ctx.fillStyle = selected ? '#ffffff' : color;
+  ctx.fill();
+
+  // tip marker
+  ctx.beginPath();
+  ctx.arc(tx,ty, 3, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fill();
+}
+
+function renderRuler(){
+  const w = ruler.width, h = ruler.height;
+  rctx.clearRect(0,0,w,h);
+  const dur = Math.max(2, state.duration);
+  const fw = Math.max(6, w/dur);
+
+  for(let f=0; f<dur; f++){
+    const x = f*fw;
+    const beat = f % 8 === 0;
+    rctx.strokeStyle = beat ? '#5c5142' : '#332c23';
+    rctx.lineWidth = 1;
+    rctx.beginPath();
+    rctx.moveTo(x, beat? 14 : 24);
+    rctx.lineTo(x, 34);
+    rctx.stroke();
+    if(beat){
+      rctx.fillStyle = '#9c8f7c';
+      rctx.font = '10px JetBrains Mono, monospace';
+      rctx.fillText(String(f), x+3, 12);
+    }
+  }
+
+  // keyframe diamonds for selected bone
+  if(state.selectedBoneId && state.keyframes[state.selectedBoneId]){
+    const kfs = state.keyframes[state.selectedBoneId];
+    Object.keys(kfs).forEach(fStr=>{
+      const f = Number(fStr);
+      const x = f*fw;
+      rctx.save();
+      rctx.translate(x, 46);
+      rctx.rotate(Math.PI/4);
+      rctx.fillStyle = '#e8a33d';
+      rctx.fillRect(-5,-5,10,10);
+      rctx.restore();
+    });
+  }
+
+  // playhead
+  const px = state.currentFrame*fw;
+  rctx.strokeStyle = '#d1614a';
+  rctx.lineWidth = 2;
+  rctx.beginPath();
+  rctx.moveTo(px, 0);
+  rctx.lineTo(px, h);
+  rctx.stroke();
+  rctx.fillStyle = '#d1614a';
+  rctx.beginPath();
+  rctx.moveTo(px-5, 0); rctx.lineTo(px+5,0); rctx.lineTo(px,8);
+  rctx.closePath(); rctx.fill();
+}
+
+function renderPanels(){
+  if(state.bones.length===0){
+    panelBones.innerHTML = '<div class="empty-note">No bones yet. Pick the Draw Bone tool and click-drag on the stage to create a rig.</div>';
+  } else {
+    panelBones.innerHTML = '';
+    state.bones.forEach(b=>{
+      const div = document.createElement('div');
+      div.className = 'row-item' + (b.id===state.selectedBoneId ? ' selected':'');
+      const hasKey = state.keyframes[b.id] && state.keyframes[b.id][state.currentFrame]!==undefined;
+      div.innerHTML =
+        '<div class="rline"><span class="swatch" style="background:'+b.color+'"></span>'+
+        '<input type="text" value="'+escapeHtml(b.name)+'" data-id="'+b.id+'" class="bname"></div>'+
+        '<div class="rmeta"><span>'+(b.parentId? 'child':'root')+' · len '+Math.round(b.length)+'</span>'+
+        '<span>'+(hasKey?'◆ keyed':'')+'</span></div>';
+      div.addEventListener('click', (e)=>{
+        if(e.target.classList.contains('bname')) return;
+        state.selectedBoneId = b.id; renderAll();
+      });
+      div.querySelector('.bname').addEventListener('input', (e)=>{ b.name = e.target.value; });
+      div.querySelector('.bname').addEventListener('click', (e)=>{ state.selectedBoneId=b.id; renderAll(); });
+      panelBones.appendChild(div);
+    });
+  }
+
+  if(state.layers.length===0){
+    panelLayers.innerHTML = '<div class="empty-note">No sprites yet. Use Import Image, then switch to the Sprite tool to place and pose it.</div>';
+  } else {
+    panelLayers.innerHTML = '';
+    state.layers.forEach(l=>{
+      const div = document.createElement('div');
+      div.className = 'row-item' + (l.id===state.selectedLayerId ? ' selected':'');
+      let opts = '<option value="">— none —</option>';
+      state.bones.forEach(b=>{ opts += '<option value="'+b.id+'"'+(l.boneId===b.id?' selected':'')+'>'+escapeHtml(b.name)+'</option>'; });
+      div.innerHTML =
+        '<div class="rline"><input type="text" value="'+escapeHtml(l.name)+'" data-id="'+l.id+'" class="lname"></div>'+
+        '<div class="rmeta"><span>parent bone</span><select class="lbone">'+opts+'</select></div>'+
+        '<div class="rmeta" style="margin-top:5px;"><button class="icon-btn del">✕ remove</button></div>';
+      div.addEventListener('click', (e)=>{
+        if(e.target.tagName==='INPUT' || e.target.tagName==='SELECT' || e.target.classList.contains('del')) return;
+        state.selectedLayerId = l.id; renderAll();
+      });
+      div.querySelector('.lname').addEventListener('input', (e)=>{ l.name = e.target.value; });
+      div.querySelector('.lbone').addEventListener('change', (e)=>{
+        attachLayerToBone(l, e.target.value || null);
+        renderAll();
+      });
+      div.querySelector('.del').addEventListener('click', ()=>{
+        state.layers = state.layers.filter(x=>x.id!==l.id);
+        if(state.selectedLayerId===l.id) state.selectedLayerId=null;
+        renderAll();
+      });
+      panelLayers.appendChild(div);
+    });
+  }
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function attachLayerToBone(layer, boneId){
+  const world = computeWorldTransforms();
+  if(!boneId){
+    // detach: convert current rendered position back to absolute stage coords
+    if(layer.boneId && world[layer.boneId]){
+      const t = world[layer.boneId];
+      const c = Math.cos(t.worldAngle), s = Math.sin(t.worldAngle);
+      layer.x = t.tipX + (layer.offsetX*c - layer.offsetY*s);
+      layer.y = t.tipY + (layer.offsetX*s + layer.offsetY*c);
+      layer.rotation = t.worldAngle + layer.offsetRot;
+    }
+    layer.boneId = null;
+    return;
+  }
+  const t = world[boneId];
+  if(!t) return;
+  const dx = layer.x - t.tipX, dy = layer.y - t.tipY;
+  const c = Math.cos(-t.worldAngle), s = Math.sin(-t.worldAngle);
+  layer.offsetX = dx*c - dy*s;
+  layer.offsetY = dx*s + dy*c;
+  layer.offsetRot = layer.rotation - t.worldAngle;
+  layer.boneId = boneId;
+}
+
+// ---------- bone creation ----------
+let creating = null; // {parentId, rootX, rootY, curX, curY}
+
+function findNearestTip(x,y,thresh){
+  const world = computeWorldTransforms();
+  let best=null, bestD=thresh;
+  state.bones.forEach(b=>{
+    const t = world[b.id];
+    const d = dist(x,y,t.tipX,t.tipY);
+    if(d<bestD){ bestD=d; best=b; }
+  });
+  return best;
+}
+function findBoneAtPoint(x,y,thresh){
+  const world = computeWorldTransforms();
+  let best=null, bestD=thresh;
+  state.bones.forEach(b=>{
+    const t = world[b.id];
+    const d = pointToSegDist(x,y,t.x,t.y,t.tipX,t.tipY);
+    if(d<bestD){ bestD=d; best=b; }
+  });
+  return best;
+}
+function findLayerAtPoint(x,y){
+  for(let i=state.layers.length-1;i>=0;i--){
+    const l = state.layers[i];
+    if(!l.img) continue;
+    const world = computeWorldTransforms();
+    let lx=l.x, ly=l.y, lr=l.rotation;
+    if(l.boneId && world[l.boneId]){
+      const t=world[l.boneId];
+      const c=Math.cos(t.worldAngle), s=Math.sin(t.worldAngle);
+      lx = t.tipX + (l.offsetX*c - l.offsetY*s);
+      ly = t.tipY + (l.offsetX*s + l.offsetY*c);
+      lr = t.worldAngle + l.offsetRot;
+    }
+    const dx=x-lx, dy=y-ly;
+    const c=Math.cos(-lr), s=Math.sin(-lr);
+    const localX = (dx*c - dy*s)/l.scale;
+    const localY = (dx*s + dy*c)/l.scale;
+    if(Math.abs(localX) <= l.width/2 && Math.abs(localY) <= l.height/2) return l;
+  }
+  return null;
+}
+
+function addBone(parentId, rootX, rootY, tipX, tipY){
+  const world = computeWorldTransforms();
+  let parentWorldAngle = 0;
+  if(parentId && world[parentId]) parentWorldAngle = world[parentId].worldAngle;
+  const length = Math.max(8, dist(rootX,rootY,tipX,tipY));
+  const worldAngle = Math.atan2(tipY-rootY, tipX-rootX);
+  const bone = {
+    id: uid(),
+    name: 'Bone ' + state.bones.length,
+    parentId: parentId || null,
+    length,
+    baseAngle: worldAngle - parentWorldAngle,
+    x: parentId ? 0 : rootX,
+    y: parentId ? 0 : rootY,
+    color: nextAccent(),
+    workingAngle: 0,
+  };
+  state.bones.push(bone);
+  state.selectedBoneId = bone.id;
+  return bone;
+}
+
+function deleteBoneCascade(boneId){
+  const toDelete = new Set([boneId]);
+  let changed = true;
+  while(changed){
+    changed = false;
+    state.bones.forEach(b=>{
+      if(b.parentId && toDelete.has(b.parentId) && !toDelete.has(b.id)){ toDelete.add(b.id); changed = true; }
+    });
+  }
+  state.bones = state.bones.filter(b=>!toDelete.has(b.id));
+  toDelete.forEach(id=>{ delete state.keyframes[id]; });
+  state.layers.forEach(l=>{ if(toDelete.has(l.boneId)) l.boneId = null; });
+  if(toDelete.has(state.selectedBoneId)) state.selectedBoneId = null;
+}
+
+// ---------- pose / IK ----------
+function poseFK(bone, mouseX, mouseY){
+  const world = computeWorldTransforms();
+  const t = world[bone.id];
+  const parentWorldAngle = bone.parentId && world[bone.parentId] ? world[bone.parentId].worldAngle : 0;
+  const desiredWorldAngle = Math.atan2(mouseY - t.y, mouseX - t.x);
+  bone.workingAngle = desiredWorldAngle - parentWorldAngle - bone.baseAngle;
+}
+
+function poseIK(bone, mouseX, mouseY){
+  const parent = bone.parentId ? getBoneById(bone.parentId) : null;
+  if(!parent){ poseFK(bone, mouseX, mouseY); return; }
+  const world = computeWorldTransforms();
+  const grandWorldAngle = parent.parentId && world[parent.parentId] ? world[parent.parentId].worldAngle : 0;
+  const rootP = { x: world[parent.id].x, y: world[parent.id].y };
+  const Lp = parent.length, Lc = bone.length;
+  let d = dist(rootP.x, rootP.y, mouseX, mouseY);
+  d = clamp(d, Math.abs(Lp-Lc)+0.01, Lp+Lc-0.01);
+  const angleToTarget = Math.atan2(mouseY-rootP.y, mouseX-rootP.x);
+  const cosA0 = clamp((Lp*Lp + d*d - Lc*Lc)/(2*Lp*d), -1, 1);
+  const angle0 = Math.acos(cosA0);
+  const angleP_world = angleToTarget - angle0;
+  const cosA1 = clamp((Lp*Lp + Lc*Lc - d*d)/(2*Lp*Lc), -1, 1);
+  const angle1 = Math.acos(cosA1);
+  const angleC_world = angleP_world + (Math.PI - angle1);
+
+  parent.workingAngle = angleP_world - grandWorldAngle - parent.baseAngle;
+  bone.workingAngle = angleC_world - angleP_world - bone.baseAngle;
+}
+
+// ---------- mouse interaction ----------
+let drag = null;
+
+function stageCoords(e){
+  const r = stage.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+stage.addEventListener('mousedown', (e)=>{
+  const {x,y} = stageCoords(e);
+  if(state.tool==='bone'){
+    const parentBone = findNearestTip(x,y,14);
+    let rootX=x, rootY=y;
+    if(parentBone){ const w = computeWorldTransforms(); rootX = w[parentBone.id].tipX; rootY = w[parentBone.id].tipY; }
+    creating = { parentId: parentBone? parentBone.id : null, rootX, rootY, curX:x, curY:y };
+  } else if(state.tool==='select'){
+    const b = findBoneAtPoint(x,y,10);
+    if(b){
+      state.selectedBoneId = b.id;
+      drag = { mode: e.shiftKey ? 'ik':'fk', bone: b };
+    }
+    renderAll();
+  } else if(state.tool==='sprite'){
+    const l = findLayerAtPoint(x,y);
+    if(l){
+      state.selectedLayerId = l.id;
+      drag = { mode: e.shiftKey ? 'sprite-rotate':'sprite-move', layer: l, startX:x, startY:y, origX:l.x, origY:l.y, origRot:l.rotation };
+    }
+    renderAll();
+  } else if(state.tool==='delete'){
+    const b = findBoneAtPoint(x,y,10);
+    if(b){ deleteBoneCascade(b.id); renderAll(); return; }
+    const l = findLayerAtPoint(x,y);
+    if(l){ state.layers = state.layers.filter(x2=>x2.id!==l.id); renderAll(); }
+  }
+});
+
+stage.addEventListener('mousemove', (e)=>{
+  const {x,y} = stageCoords(e);
+  if(creating){
+    creating.curX = x; creating.curY = y;
+    renderStage();
+  } else if(drag){
+    if(drag.mode==='fk'){ poseFK(drag.bone, x, y); }
+    else if(drag.mode==='ik'){ poseIK(drag.bone, x, y); }
+    else if(drag.mode==='sprite-move'){
+      drag.layer.x = drag.origX + (x - drag.startX);
+      drag.layer.y = drag.origY + (y - drag.startY);
+    } else if(drag.mode==='sprite-rotate'){
+      const a0 = Math.atan2(drag.startY-drag.origY, drag.startX-drag.origX);
+      const a1 = Math.atan2(y-drag.origY, x-drag.origX);
+      drag.layer.rotation = drag.origRot + (a1-a0);
+    }
+    renderStage();
+  }
+});
+
+window.addEventListener('mouseup', (e)=>{
+  if(creating){
+    const len = dist(creating.rootX,creating.rootY,creating.curX,creating.curY);
+    if(len > 8){ addBone(creating.parentId, creating.rootX, creating.rootY, creating.curX, creating.curY); }
+    creating = null;
+    renderAll();
+  }
+  drag = null;
+});
+
+stage.addEventListener('wheel', (e)=>{
+  if(state.tool==='sprite' && state.selectedLayerId){
+    e.preventDefault();
+    const l = state.layers.find(x=>x.id===state.selectedLayerId);
+    if(l){ l.scale = clamp(l.scale * (e.deltaY<0 ? 1.06 : 0.94), 0.05, 8); renderStage(); }
+  }
+}, {passive:false});
+
+// ---------- timeline interaction ----------
+let rulerDragging = false;
+function rulerFrameFromX(x){
+  const dur = Math.max(2, state.duration);
+  const fw = Math.max(6, ruler.width/dur);
+  return clamp(Math.round(x/fw), 0, dur-1);
+}
+ruler.addEventListener('mousedown', (e)=>{
+  rulerDragging = true;
+  const r = ruler.getBoundingClientRect();
+  state.currentFrame = rulerFrameFromX(e.clientX - r.left);
+  applyPoseForFrame(state.currentFrame);
+  renderAll();
+});
+window.addEventListener('mousemove',(e)=>{
+  if(rulerDragging){
+    const r = ruler.getBoundingClientRect();
+    state.currentFrame = rulerFrameFromX(e.clientX - r.left);
+    applyPoseForFrame(state.currentFrame);
+    renderAll();
+  }
+});
+window.addEventListener('mouseup', ()=>{ rulerDragging = false; });
+
+// ---------- keying ----------
+document.getElementById('btnKey').addEventListener('click', ()=>{
+  if(!state.selectedBoneId){ alert('Select a bone first.'); return; }
+  if(!state.keyframes[state.selectedBoneId]) state.keyframes[state.selectedBoneId] = {};
+  const b = getBoneById(state.selectedBoneId);
+  state.keyframes[state.selectedBoneId][state.currentFrame] = b.workingAngle || 0;
+  renderAll();
+});
+document.getElementById('btnKeyAll').addEventListener('click', ()=>{
+  state.bones.forEach(b=>{
+    if(!state.keyframes[b.id]) state.keyframes[b.id] = {};
+    state.keyframes[b.id][state.currentFrame] = b.workingAngle || 0;
+  });
+  renderAll();
+});
+document.getElementById('btnDelKey').addEventListener('click', ()=>{
+  if(!state.selectedBoneId || !state.keyframes[state.selectedBoneId]) return;
+  delete state.keyframes[state.selectedBoneId][state.currentFrame];
+  renderAll();
+});
+
+// ---------- playback ----------
+let playTimer = null;
+document.getElementById('btnPlay').addEventListener('click', ()=>{
+  state.playing = !state.playing;
+  const btn = document.getElementById('btnPlay');
+  btn.textContent = state.playing ? '⏸ Pause' : '▶ Play';
+  if(state.playing) startPlayback(); else stopPlayback();
+});
+function startPlayback(){
+  stopPlayback();
+  playTimer = setInterval(()=>{
+    state.currentFrame = (state.currentFrame+1) % Math.max(1,state.duration);
+    applyPoseForFrame(state.currentFrame);
+    renderAll();
+  }, 1000/state.fps);
+}
+function stopPlayback(){
+  if(playTimer){ clearInterval(playTimer); playTimer = null; }
+}
+
+document.getElementById('fpsInput').addEventListener('change',(e)=>{
+  state.fps = clamp(parseInt(e.target.value)||24, 1, 60);
+  if(state.playing) startPlayback();
+});
+document.getElementById('durInput').addEventListener('change',(e)=>{
+  state.duration = clamp(parseInt(e.target.value)||48, 2, 600);
+  state.currentFrame = clamp(state.currentFrame, 0, state.duration-1);
+  renderAll();
+});
+
+// ---------- file ops ----------
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+
+document.getElementById('btnNew').addEventListener('click', ()=>{
+  if(!confirm('Start a new project? Unsaved work will be lost.')) return;
+  state.bones = []; state.layers = []; state.keyframes = {};
+  state.selectedBoneId = null; state.selectedLayerId = null;
+  state.currentFrame = 0;
+  renderAll();
+});
+
+document.getElementById('btnSave').addEventListener('click', ()=>{
+  const data = {
+    fps: state.fps, duration: state.duration,
+    bones: state.bones.map(b=>({id:b.id,name:b.name,parentId:b.parentId,length:b.length,baseAngle:b.baseAngle,x:b.x,y:b.y,color:b.color})),
+    layers: state.layers.map(l=>({id:l.id,name:l.name,src:l.src,x:l.x,y:l.y,rotation:l.rotation,scale:l.scale,width:l.width,height:l.height,boneId:l.boneId,offsetX:l.offsetX,offsetY:l.offsetY,offsetRot:l.offsetRot,visible:l.visible})),
+    keyframes: state.keyframes,
+  };
+  downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), 'motion-engine-project.json');
+});
+
+document.getElementById('btnLoad').addEventListener('click', ()=> document.getElementById('fileLoad').click());
+document.getElementById('fileLoad').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      state.bones = (data.bones||[]).map(b=>({...b, workingAngle:0}));
+      state.keyframes = data.keyframes || {};
+      state.fps = data.fps || 24;
+      state.duration = data.duration || 48;
+      document.getElementById('fpsInput').value = state.fps;
+      document.getElementById('durInput').value = state.duration;
+      state.layers = [];
+      (data.layers||[]).forEach(l=>{
+        const img = new Image();
+        img.onload = renderAll;
+        img.src = l.src;
+        state.layers.push({...l, img});
+      });
+      state.currentFrame = 0;
+      state.selectedBoneId = null; state.selectedLayerId = null;
+      applyPoseForFrame(0);
+      renderAll();
+    } catch(err){ alert('Could not read project file: ' + err.message); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+document.getElementById('btnImportImg').addEventListener('click', ()=> document.getElementById('fileImg').click());
+document.getElementById('fileImg').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maxDim = 220;
+      const scaleFit = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+      const layer = {
+        id: uid(), name: file.name.replace(/\.[^.]+$/,''),
+        img, src: reader.result,
+        x: stage.width/2, y: stage.height/2, rotation:0, scale:1,
+        width: img.naturalWidth*scaleFit, height: img.naturalHeight*scaleFit,
+        boneId: null, offsetX:0, offsetY:0, offsetRot:0, visible:true,
+      };
+      state.layers.push(layer);
+      state.selectedLayerId = layer.id;
+      setTool('sprite');
+      renderAll();
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+document.getElementById('btnExportPng').addEventListener('click', ()=>{
+  stage.toBlob(blob=>{ downloadBlob(blob, 'motion-engine-frame-'+state.currentFrame+'.png'); }, 'image/png');
+});
+
+document.getElementById('btnExportVideo').addEventListener('click', ()=>{
+  if(state.bones.length===0 && state.layers.length===0){ alert('Nothing to export yet — add a rig or sprite first.'); return; }
+  if(typeof stage.captureStream !== 'function'){ alert('This browser does not support canvas video capture.'); return; }
+  const wasPlaying = state.playing;
+  state.playing = false; stopPlayback();
+  document.getElementById('btnPlay').textContent = '▶ Play';
+
+  const stream = stage.captureStream(state.fps);
+  let recorder;
+  try{
+    recorder = new MediaRecorder(stream, {mimeType:'video/webm;codecs=vp9'});
+  } catch(err){
+    recorder = new MediaRecorder(stream);
+  }
+  const chunks = [];
+  recorder.ondataavailable = (e)=>{ if(e.data.size>0) chunks.push(e.data); };
+  recorder.onstop = ()=>{
+    const blob = new Blob(chunks, {type:'video/webm'});
+    downloadBlob(blob, 'motion-engine-export.webm');
+    if(wasPlaying){ state.playing=true; document.getElementById('btnPlay').textContent='⏸ Pause'; startPlayback(); }
+  };
+  recorder.start();
+  const frameDuration = 1000/state.fps;
+  let f = 0;
+  const step = ()=>{
+    state.currentFrame = f;
+    applyPoseForFrame(f);
+    renderAll();
+    f++;
+    if(f < state.duration){ setTimeout(step, frameDuration); }
+    else { setTimeout(()=>recorder.stop(), frameDuration + 250); }
+  };
+  step();
+});
+
+// ---------- demo rig on first load ----------
+function buildDemoRig(){
+  const cx = stage.width*0.35, cy = stage.height*0.55;
+  const shoulder = addBone(null, cx, cy, cx+90, cy-10);
+  shoulder.name = 'Upper Arm';
+  const elbow = addBone(shoulder.id, 0,0, 0,0);
+  // manually recompute proper tip using world transform since addBone needs on-screen coords
+  const w1 = computeWorldTransforms();
+  const forearmTip = { x: w1[shoulder.id].tipX + 80, y: w1[shoulder.id].tipY + 25 };
+  elbow.length = dist(w1[shoulder.id].tipX, w1[shoulder.id].tipY, forearmTip.x, forearmTip.y);
+  elbow.baseAngle = Math.atan2(forearmTip.y-w1[shoulder.id].tipY, forearmTip.x-w1[shoulder.id].tipX) - w1[shoulder.id].worldAngle;
+  elbow.name = 'Forearm';
+
+  const w2 = computeWorldTransforms();
+  const hand = addBone(elbow.id, 0,0,0,0);
+  const handTip = { x: w2[elbow.id].tipX + 36, y: w2[elbow.id].tipY - 6 };
+  hand.length = dist(w2[elbow.id].tipX, w2[elbow.id].tipY, handTip.x, handTip.y);
+  hand.baseAngle = Math.atan2(handTip.y-w2[elbow.id].tipY, handTip.x-w2[elbow.id].tipX) - w2[elbow.id].worldAngle;
+  hand.name = 'Hand';
+
+  state.keyframes[shoulder.id] = {0:0, 12:-0.35, 24:0.1, 36:-0.15, 48:0};
+  state.keyframes[elbow.id]    = {0:0, 12:0.5,  24:-0.2, 36:0.3,  48:0};
+  state.keyframes[hand.id]     = {0:0, 12:-0.2, 24:0.3,  36:-0.1, 48:0};
+
+  state.selectedBoneId = shoulder.id;
+  state.duration = 48;
+  document.getElementById('durInput').value = 48;
+  applyPoseForFrame(0);
+}
+
+// ---------- boot ----------
+resizeCanvases();
+buildDemoRig();
+renderAll();
+
+})();
+</script>
+</body>
+</html>
