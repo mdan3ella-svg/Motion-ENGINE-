@@ -27,32 +27,51 @@
   button:hover{background:var(--line);border-color:var(--cyan-dim);}
   button.active{background:var(--cyan-dim);border-color:var(--cyan);color:#fff;}
   button:active{transform:translateY(1px);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
   input[type=number]{width:52px;background:var(--void);border:1px solid var(--line);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:3px;padding:3px 5px;}
   input[type=text]{background:var(--void);border:1px solid var(--line);color:var(--text);font-size:12px;border-radius:3px;padding:4px 6px;font-family:'Inter',sans-serif;}
+  input[type=color]{width:38px;height:24px;padding:0;border:1px solid var(--line);background:var(--void);border-radius:3px;cursor:pointer;}
   select{background:var(--void);color:var(--text);border:1px solid var(--line);border-radius:3px;font-size:11px;padding:3px;}
   label{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:5px;}
+  hr.sep{border:none;border-top:1px solid var(--line);margin:6px 0;}
 
   .app{display:flex;flex-direction:column;height:100vh;}
 
-  .topbar{display:flex;align-items:center;gap:18px;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-shrink:0;}
+  .topbar{display:flex;align-items:center;gap:14px;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-shrink:0;flex-wrap:wrap;row-gap:6px;}
   .brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:.08em;color:var(--text);}
   .brand span{color:var(--amber);}
   .file-actions{display:flex;gap:6px;flex-wrap:wrap;}
   .spacer{flex:1;}
   .mode-badge{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);border:1px solid var(--amber-dim);padding:4px 10px;border-radius:3px;letter-spacing:.05em;white-space:nowrap;}
 
+  /* dropdowns + popovers */
+  .dropdown{position:relative;display:inline-block;}
+  .dropdown-menu, .popover{display:none;position:absolute;top:calc(100% + 4px);left:0;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:8px;z-index:80;min-width:230px;box-shadow:0 10px 26px rgba(0,0,0,.5);}
+  .dropdown.open .dropdown-menu, .dropdown.open .popover{display:block;}
+  .dropdown-menu button, .popover button{display:block;width:100%;text-align:left;margin-bottom:5px;}
+  .dropdown-menu button:last-child, .popover button:last-child{margin-bottom:0;}
+  .menu-note{font-size:10px;color:var(--text-dim);line-height:1.4;padding:2px 2px 6px;}
+  .pop-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;}
+  .pop-row:last-child{margin-bottom:0;}
+  .pop-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:6px;}
+  .check-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:11px;color:var(--text-dim);}
+  .check-row input{margin:0;}
+
   .workspace{display:flex;flex:1;min-height:0;}
   .toolrail{width:132px;background:var(--panel);border-right:1px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
   .toolrail .tool{width:100%;text-align:left;}
-  .hint{margin-top:12px;font-size:11px;color:var(--text-dim);line-height:1.5;border-top:1px solid var(--line);padding-top:10px;}
+  .hint{margin-top:12px;font-size:11px;color:var(--text-dim);line-height:1.5;border-top:1px solid var(--line);padding-top:10px;white-space:pre-line;}
 
   .stage-wrap{flex:1;position:relative;background:
       radial-gradient(circle at 30% 20%, #1c1712 0%, #14110f 65%);
     min-width:0;}
   #stage{display:block;width:100%;height:100%;cursor:crosshair;}
+  #stage.pan-cursor{cursor:grab;}
+  #stage.panning-cursor{cursor:grabbing;}
   .stage-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:var(--text-dim);font-size:13px;text-align:center;padding:40px;}
+  .cam-label{position:absolute;left:8px;bottom:8px;font:11px 'JetBrains Mono',monospace;color:var(--text-dim);pointer-events:none;background:rgba(20,17,15,.55);padding:3px 7px;border-radius:3px;border:1px solid var(--line);}
 
-  .rightpanel{width:250px;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
+  .rightpanel{width:262px;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
   .tabs{display:flex;border-bottom:1px solid var(--line);}
   .tab{flex:1;background:none;border:none;border-radius:0;padding:9px;font-size:11px;color:var(--text-dim);border-bottom:2px solid transparent;}
   .tab.active{color:var(--amber);border-bottom:2px solid var(--amber);}
@@ -62,10 +81,15 @@
   .row-item .rline{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
   .row-item .swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
   .row-item input[type=text]{flex:1;min-width:0;}
-  .row-item .rmeta{display:flex;justify-content:space-between;align-items:center;gap:6px;color:var(--text-dim);}
+  .row-item .rmeta{display:flex;justify-content:space-between;align-items:center;gap:6px;color:var(--text-dim);flex-wrap:wrap;}
+  .row-item select{max-width:120px;}
   .icon-btn{background:none;border:none;color:var(--text-dim);padding:2px 5px;font-size:13px;}
   .icon-btn:hover{color:var(--danger);background:none;border-color:transparent;}
+  .order-btn{background:none;border:none;color:var(--text-dim);padding:1px 5px;font-size:11px;}
+  .order-btn:hover{color:var(--cyan);background:none;border-color:transparent;}
+  .order-btn:disabled{opacity:.25;}
   .empty-note{color:var(--text-dim);font-size:11px;padding:14px 6px;line-height:1.6;}
+  .tree-branch{color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:11px;margin-right:2px;}
 
   .timeline{background:var(--panel);border-top:1px solid var(--line);flex-shrink:0;padding:8px 14px 10px;}
   .tl-controls{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap;}
@@ -81,6 +105,7 @@
 
   <div class="topbar">
     <div class="brand">MOTION <span>ENGINE</span></div>
+
     <div class="file-actions">
       <button id="btnNew">New</button>
       <button id="btnSave">Save Project</button>
@@ -88,9 +113,55 @@
       <input type="file" id="fileLoad" hidden accept=".json,application/json">
       <button id="btnImportImg">Import Image</button>
       <input type="file" id="fileImg" hidden accept="image/*">
-      <button id="btnExportPng">Export Frame PNG</button>
-      <button id="btnExportVideo">Export WebM</button>
     </div>
+
+    <div class="dropdown" id="ddTemplates">
+      <button class="dropdown-toggle" id="btnTemplates">✚ Rig Templates ▾</button>
+      <div class="dropdown-menu">
+        <div class="menu-note">Build a new skeleton — next click on the stage places its root.</div>
+        <button data-tpl="biped">🧍 Biped (new)</button>
+        <button data-tpl="quadruped">🐆 Quadruped (new)</button>
+        <hr class="sep">
+        <div class="menu-note">Extend the SELECTED bone with a chain — attaches right to its tip, no click needed.</div>
+        <button data-tpl="tail">🐍 Tail Extension</button>
+        <button data-tpl="limb">🦴 Limb Chain</button>
+      </div>
+    </div>
+
+    <div class="dropdown" id="ddBackground">
+      <button class="dropdown-toggle" id="btnBackground">🖼 Background ▾</button>
+      <div class="popover">
+        <div class="pop-title">Backdrop Color</div>
+        <div class="pop-row"><label>Fill <input type="color" id="bgColor" value="#14110f"></label>
+          <button id="btnBgClear">Clear Image</button></div>
+        <div class="pop-title">Background Image</div>
+        <div class="pop-row"><button id="btnBgImport" style="flex:1">Import Image</button></div>
+        <input type="file" id="fileBg" hidden accept="image/*">
+        <div class="pop-row" id="bgFitRow" style="display:none;">
+          <label>Fit <select id="bgFit">
+            <option value="cover">Cover</option>
+            <option value="contain">Contain</option>
+            <option value="tile">Tile</option>
+          </select></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="dropdown" id="ddExport">
+      <button class="dropdown-toggle" id="btnExportOpts">⚙ Export Options ▾</button>
+      <div class="popover" style="min-width:200px;">
+        <div class="check-row"><input type="checkbox" id="optGrid"><label for="optGrid" style="margin:0;">Include grid in export</label></div>
+        <div class="check-row"><input type="checkbox" id="optBones"><label for="optBones" style="margin:0;">Include skeleton overlay</label></div>
+        <div class="check-row"><input type="checkbox" id="optTransparent"><label for="optTransparent" style="margin:0;">Transparent background (PNG)</label></div>
+        <hr class="sep">
+        <button id="btnExportPng" style="width:100%;margin-bottom:5px;">Export Frame PNG</button>
+        <button id="btnExportVideo" style="width:100%;">Export WebM</button>
+      </div>
+    </div>
+
+    <label style="white-space:nowrap;"><input type="checkbox" id="gridToggle" checked> Grid</label>
+    <button id="btnResetView">⤾ Reset View</button>
+
     <div class="spacer"></div>
     <div class="mode-badge" id="modeBadge">POSE MODE</div>
   </div>
@@ -100,13 +171,15 @@
       <button class="tool active" data-tool="select">◎ Pose / Select</button>
       <button class="tool" data-tool="bone">⌁ Draw Bone</button>
       <button class="tool" data-tool="sprite">▭ Move Sprite</button>
+      <button class="tool" data-tool="pan">✋ Pan / Scroll</button>
       <button class="tool" data-tool="delete">✕ Erase</button>
       <div class="hint" id="toolHint"></div>
     </div>
 
     <div class="stage-wrap">
       <canvas id="stage"></canvas>
-      <div class="stage-empty" id="stageEmpty" style="display:none;">Draw Bone tool: click and drag to lay down a bone.<br>Click an existing tip first to chain a child bone from it.</div>
+      <div class="stage-empty" id="stageEmpty" style="display:none;">Draw Bone tool: click and drag to lay down a bone.<br>Click an existing tip first to chain a child bone from it.<br><br>Or grab a full skeleton from Rig Templates ▾ above.</div>
+      <div class="cam-label" id="camLabel">X: 0  Y: 0</div>
     </div>
 
     <div class="rightpanel">
@@ -157,6 +230,11 @@ const state = {
   selectedLayerId: null,
   tool: 'select',
   playing: false,
+  camera: { x: 0, y: 0 },
+  showGrid: true,
+  background: { color: '#14110f', img: null, src: null, fit: 'cover' },
+  exportOptions: { includeGrid: false, includeBones: false, transparentBg: false },
+  pendingTemplate: null, // 'biped' | 'quadruped' while armed, waiting for a stage click
 };
 
 // ---------- dom ----------
@@ -171,11 +249,13 @@ const toolHint = document.getElementById('toolHint');
 const frameLabel = document.getElementById('frameLabel');
 const panelBones = document.getElementById('panelBones');
 const panelLayers = document.getElementById('panelLayers');
+const camLabel = document.getElementById('camLabel');
 
 const HINTS = {
   select: "Drag a bone's tip to rotate it (FK).\nHold Shift while dragging to solve a 2-bone IK chain with its parent.\nClick a bone to select it for keying.",
   bone: "Click + drag to place a bone.\nClicking near an existing tip starts a child bone chained to it.\nRelease to finish the bone.",
   sprite: "Drag a sprite to move it.\nHold Shift + drag to rotate.\nScroll wheel to scale.\nAssign a parent bone in the Layers panel.",
+  pan: "Click + drag to scroll the camera around the stage.\nShift + scroll wheel (or a trackpad horizontal swipe) also pans horizontally.\nUse Reset View to snap back to the origin.",
   delete: "Click a bone to delete it and everything chained below it.\nClick a sprite to remove it.",
 };
 
@@ -183,7 +263,8 @@ function setTool(t){
   state.tool = t;
   document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('active', b.dataset.tool===t));
   toolHint.textContent = HINTS[t];
-  modeBadge.textContent = ({select:'POSE MODE',bone:'RIG MODE',sprite:'SPRITE MODE',delete:'ERASE MODE'})[t];
+  modeBadge.textContent = ({select:'POSE MODE',bone:'RIG MODE',sprite:'SPRITE MODE',pan:'PAN MODE',delete:'ERASE MODE'})[t];
+  stage.classList.toggle('pan-cursor', t==='pan');
 }
 document.querySelectorAll('.tool').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
 setTool('select');
@@ -194,6 +275,21 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   panelBones.style.display = t.dataset.tab==='bones' ? 'block':'none';
   panelLayers.style.display = t.dataset.tab==='layers' ? 'block':'none';
 }));
+
+// ---------- generic dropdown / popover behavior ----------
+document.querySelectorAll('.dropdown-toggle').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const dd = btn.closest('.dropdown');
+    const wasOpen = dd.classList.contains('open');
+    document.querySelectorAll('.dropdown.open').forEach(x=>x.classList.remove('open'));
+    if(!wasOpen) dd.classList.add('open');
+  });
+});
+document.addEventListener('click', ()=>{ document.querySelectorAll('.dropdown.open').forEach(x=>x.classList.remove('open')); });
+document.querySelectorAll('.dropdown .popover, .dropdown .dropdown-menu').forEach(el=>{
+  el.addEventListener('click', (e)=> e.stopPropagation());
+});
 
 // ---------- canvas sizing ----------
 function resizeCanvases(){
@@ -223,6 +319,20 @@ function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
 function getBoneById(id){ return state.bones.find(b=>b.id===id); }
 function getChildren(id){ return state.bones.filter(b=>b.parentId===id); }
 
+function getDescendantIds(boneId){
+  const ids = new Set();
+  let changed = true;
+  while(changed){
+    changed = false;
+    state.bones.forEach(b=>{
+      if(b.parentId && (b.parentId===boneId || ids.has(b.parentId)) && !ids.has(b.id) && b.id!==boneId){
+        ids.add(b.id); changed = true;
+      }
+    });
+  }
+  return ids;
+}
+
 function getKeyedAngle(boneId, frame){
   const kfs = state.keyframes[boneId];
   if(!kfs) return 0;
@@ -243,7 +353,7 @@ function applyPoseForFrame(f){
   state.bones.forEach(b=>{ b.workingAngle = getKeyedAngle(b.id, f); });
 }
 
-// world transform cache, recomputed each render
+// world transform cache, recomputed each render / each template step
 function computeWorldTransforms(){
   const world = {};
   function computeBone(bone){
@@ -272,23 +382,64 @@ function renderAll(){
   renderRuler();
   renderPanels();
   frameLabel.textContent = "F " + state.currentFrame + " / " + state.duration;
-  stageEmpty.style.display = (state.bones.length===0 && state.layers.length===0) ? 'flex' : 'none';
+  stageEmpty.style.display = (state.bones.length===0 && state.layers.length===0 && !state.pendingTemplate) ? 'flex' : 'none';
+  camLabel.textContent = "X: " + Math.round(state.camera.x) + "  Y: " + Math.round(state.camera.y);
 }
 
-function renderStage(){
+function drawBackground(w,h,forExport){
+  const opts = state.exportOptions;
+  if(forExport && opts.transparentBg) return; // leave transparent for PNG alpha
+  ctx.save();
+  ctx.fillStyle = state.background.color;
+  ctx.fillRect(0,0,w,h);
+  const img = state.background.img;
+  if(img && img.complete && img.naturalWidth>0){
+    ctx.save();
+    ctx.translate(-state.camera.x, -state.camera.y);
+    if(state.background.fit === 'tile'){
+      const pattern = ctx.createPattern(img, 'repeat');
+      if(pattern){
+        ctx.fillStyle = pattern;
+        ctx.fillRect(state.camera.x, state.camera.y, w, h);
+      }
+    } else {
+      const iw = img.naturalWidth, ih = img.naturalHeight;
+      const scaleCover = Math.max(w/iw, h/ih);
+      const scaleContain = Math.min(w/iw, h/ih);
+      const s = state.background.fit === 'contain' ? scaleContain : scaleCover;
+      const dw = iw*s, dh = ih*s, dx = (w-dw)/2, dy = (h-dh)/2;
+      ctx.drawImage(img, dx, dy, dw, dh);
+    }
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function renderStage(opts){
+  opts = opts || {};
+  const forExport = !!opts.forExport;
   const w = stage.width, h = stage.height;
   ctx.clearRect(0,0,w,h);
 
-  // subtle grid
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-  ctx.lineWidth = 1;
-  const grid = 40;
-  for(let x=0;x<w;x+=grid){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-  for(let y=0;y<h;y+=grid){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  drawBackground(w,h,forExport);
+
+  ctx.save();
+  ctx.translate(-state.camera.x, -state.camera.y);
+
+  const showGrid = forExport ? !!state.exportOptions.includeGrid : state.showGrid;
+  if(showGrid){
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1;
+    const grid = 40;
+    const startX = Math.floor(state.camera.x/grid)*grid;
+    const startY = Math.floor(state.camera.y/grid)*grid;
+    for(let x=startX; x<state.camera.x+w+grid; x+=grid){ ctx.beginPath(); ctx.moveTo(x,state.camera.y); ctx.lineTo(x,state.camera.y+h); ctx.stroke(); }
+    for(let y=startY; y<state.camera.y+h+grid; y+=grid){ ctx.beginPath(); ctx.moveTo(state.camera.x,y); ctx.lineTo(state.camera.x+w,y); ctx.stroke(); }
+  }
 
   const world = computeWorldTransforms();
 
-  // layers (sprites) drawn first
+  // layers (sprites) drawn first, in array order = back to front
   state.layers.forEach(layer=>{
     if(layer.visible===false) return;
     if(!layer.img || !layer.img.complete || layer.img.naturalWidth===0) return;
@@ -306,7 +457,7 @@ function renderStage(){
     ctx.scale(layer.scale, layer.scale);
     ctx.globalAlpha = 1;
     ctx.drawImage(layer.img, -layer.width/2, -layer.height/2, layer.width, layer.height);
-    if(layer.id===state.selectedLayerId && state.tool==='sprite'){
+    if(!forExport && layer.id===state.selectedLayerId && state.tool==='sprite'){
       ctx.strokeStyle = '#e8a33d';
       ctx.lineWidth = 2/layer.scale;
       ctx.strokeRect(-layer.width/2,-layer.height/2, layer.width, layer.height);
@@ -314,19 +465,23 @@ function renderStage(){
     ctx.restore();
   });
 
-  // bones drawn on top
-  state.bones.forEach(bone=>{
-    const t = world[bone.id];
-    if(!t) return;
-    drawBone(t.x,t.y,t.tipX,t.tipY,bone.color, bone.id===state.selectedBoneId, bone.length);
-  });
-
-  if(state.tool==='bone' && creating){
-    drawBone(creating.rootX, creating.rootY, creating.curX, creating.curY, '#ffffff', true, dist(creating.rootX,creating.rootY,creating.curX,creating.curY), true);
+  // bones drawn on top -- never baked into a real export unless explicitly opted in
+  const showBones = forExport ? !!state.exportOptions.includeBones : true;
+  if(showBones){
+    state.bones.forEach(bone=>{
+      const t = world[bone.id];
+      if(!t) return;
+      drawBone(t.x,t.y,t.tipX,t.tipY,bone.color, (!forExport && bone.id===state.selectedBoneId), bone.length, false, forExport);
+    });
+    if(!forExport && state.tool==='bone' && creating){
+      drawBone(creating.rootX, creating.rootY, creating.curX, creating.curY, '#ffffff', true, dist(creating.rootX,creating.rootY,creating.curX,creating.curY), true, false);
+    }
   }
+
+  ctx.restore();
 }
 
-function drawBone(rx,ry,tx,ty,color,selected,length,ghost){
+function drawBone(rx,ry,tx,ty,color,selected,length,ghost,minimal){
   const dx=tx-rx, dy=ty-ry;
   const len = Math.hypot(dx,dy) || 1;
   const nx = -dy/len, ny = dx/len;
@@ -341,24 +496,26 @@ function drawBone(rx,ry,tx,ty,color,selected,length,ghost){
   ctx.lineTo(mx - nx*w, my - ny*w);
   ctx.closePath();
   ctx.fillStyle = ghost ? 'rgba(255,255,255,0.15)' : (color + (selected?'':'cc'));
-  ctx.globalAlpha = ghost ? 0.6 : 0.85;
+  ctx.globalAlpha = ghost ? 0.6 : (minimal ? 0.55 : 0.85);
   ctx.fill();
   ctx.globalAlpha = 1;
   ctx.strokeStyle = selected ? '#ffffff' : color;
   ctx.lineWidth = selected ? 2 : 1;
   ctx.stroke();
 
-  // root joint
-  ctx.beginPath();
-  ctx.arc(rx,ry, selected?6:4.5, 0, Math.PI*2);
-  ctx.fillStyle = selected ? '#ffffff' : color;
-  ctx.fill();
+  if(!minimal){
+    // root joint
+    ctx.beginPath();
+    ctx.arc(rx,ry, selected?6:4.5, 0, Math.PI*2);
+    ctx.fillStyle = selected ? '#ffffff' : color;
+    ctx.fill();
 
-  // tip marker
-  ctx.beginPath();
-  ctx.arc(tx,ty, 3, 0, Math.PI*2);
-  ctx.fillStyle = 'rgba(255,255,255,0.6)';
-  ctx.fill();
+    // tip marker
+    ctx.beginPath();
+    ctx.arc(tx,ty, 3, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fill();
+  }
 }
 
 function renderRuler(){
@@ -412,26 +569,64 @@ function renderRuler(){
   rctx.closePath(); rctx.fill();
 }
 
+// ---------- bone hierarchy tree ordering ----------
+function getBoneDisplayOrder(){
+  const byParent = {};
+  state.bones.forEach(b=>{
+    const key = b.parentId || '__root__';
+    if(!byParent[key]) byParent[key] = [];
+    byParent[key].push(b);
+  });
+  const order = [];
+  const seen = new Set();
+  function walk(parentKey, depth){
+    (byParent[parentKey]||[]).forEach(b=>{
+      if(seen.has(b.id)) return;
+      seen.add(b.id);
+      order.push({bone:b, depth});
+      walk(b.id, depth+1);
+    });
+  }
+  walk('__root__', 0);
+  // safety net: bones with a dangling/cyclic parentId still get listed
+  state.bones.forEach(b=>{ if(!seen.has(b.id)){ seen.add(b.id); order.push({bone:b, depth:0}); } });
+  return order;
+}
+
 function renderPanels(){
   if(state.bones.length===0){
-    panelBones.innerHTML = '<div class="empty-note">No bones yet. Pick the Draw Bone tool and click-drag on the stage to create a rig.</div>';
+    panelBones.innerHTML = '<div class="empty-note">No bones yet. Pick the Draw Bone tool and click-drag on the stage, or drop in a full skeleton from Rig Templates ▾ above.</div>';
   } else {
     panelBones.innerHTML = '';
-    state.bones.forEach(b=>{
+    const ordered = getBoneDisplayOrder();
+    ordered.forEach(({bone:b, depth})=>{
       const div = document.createElement('div');
       div.className = 'row-item' + (b.id===state.selectedBoneId ? ' selected':'');
+      div.style.marginLeft = (depth*13) + 'px';
       const hasKey = state.keyframes[b.id] && state.keyframes[b.id][state.currentFrame]!==undefined;
+      const branch = depth>0 ? '<span class="tree-branch">└</span>' : '';
+      const excluded = getDescendantIds(b.id); excluded.add(b.id);
+      let popts = '<option value="">— root —</option>';
+      state.bones.forEach(ob=>{
+        if(excluded.has(ob.id)) return;
+        popts += '<option value="'+ob.id+'"'+(b.parentId===ob.id?' selected':'')+'>'+escapeHtml(ob.name)+'</option>';
+      });
       div.innerHTML =
-        '<div class="rline"><span class="swatch" style="background:'+b.color+'"></span>'+
+        '<div class="rline">'+branch+'<span class="swatch" style="background:'+b.color+'"></span>'+
         '<input type="text" value="'+escapeHtml(b.name)+'" data-id="'+b.id+'" class="bname"></div>'+
-        '<div class="rmeta"><span>'+(b.parentId? 'child':'root')+' · len '+Math.round(b.length)+'</span>'+
-        '<span>'+(hasKey?'◆ keyed':'')+'</span></div>';
+        '<div class="rmeta"><span>len '+Math.round(b.length)+(hasKey?' · ◆ keyed':'')+'</span></div>'+
+        '<div class="rmeta" style="margin-top:4px;"><span>parent</span><select class="bparent">'+popts+'</select></div>';
       div.addEventListener('click', (e)=>{
-        if(e.target.classList.contains('bname')) return;
+        if(e.target.classList.contains('bname') || e.target.classList.contains('bparent')) return;
         state.selectedBoneId = b.id; renderAll();
       });
       div.querySelector('.bname').addEventListener('input', (e)=>{ b.name = e.target.value; });
       div.querySelector('.bname').addEventListener('click', (e)=>{ state.selectedBoneId=b.id; renderAll(); });
+      div.querySelector('.bparent').addEventListener('click', (e)=> e.stopPropagation());
+      div.querySelector('.bparent').addEventListener('change', (e)=>{
+        reparentBone(b, e.target.value || null);
+        renderAll();
+      });
       panelBones.appendChild(div);
     });
   }
@@ -440,32 +635,51 @@ function renderPanels(){
     panelLayers.innerHTML = '<div class="empty-note">No sprites yet. Use Import Image, then switch to the Sprite tool to place and pose it.</div>';
   } else {
     panelLayers.innerHTML = '';
-    state.layers.forEach(l=>{
+    // display top-of-stack first so "front" reads at the top of the list
+    for(let i=state.layers.length-1; i>=0; i--){
+      const l = state.layers[i];
       const div = document.createElement('div');
       div.className = 'row-item' + (l.id===state.selectedLayerId ? ' selected':'');
       let opts = '<option value="">— none —</option>';
       state.bones.forEach(b=>{ opts += '<option value="'+b.id+'"'+(l.boneId===b.id?' selected':'')+'>'+escapeHtml(b.name)+'</option>'; });
+      const atFront = i===state.layers.length-1, atBack = i===0;
       div.innerHTML =
         '<div class="rline"><input type="text" value="'+escapeHtml(l.name)+'" data-id="'+l.id+'" class="lname"></div>'+
         '<div class="rmeta"><span>parent bone</span><select class="lbone">'+opts+'</select></div>'+
-        '<div class="rmeta" style="margin-top:5px;"><button class="icon-btn del">✕ remove</button></div>';
+        '<div class="rmeta" style="margin-top:5px;">'+
+          '<span><button class="order-btn moveback" title="Send back" '+(atBack?'disabled':'')+'>▼ back</button> '+
+          '<button class="order-btn movefront" title="Bring front" '+(atFront?'disabled':'')+'>▲ front</button></span>'+
+          '<button class="icon-btn del">✕ remove</button></div>';
       div.addEventListener('click', (e)=>{
-        if(e.target.tagName==='INPUT' || e.target.tagName==='SELECT' || e.target.classList.contains('del')) return;
+        if(e.target.tagName==='INPUT' || e.target.tagName==='SELECT' || e.target.classList.contains('del') || e.target.classList.contains('order-btn')) return;
         state.selectedLayerId = l.id; renderAll();
       });
       div.querySelector('.lname').addEventListener('input', (e)=>{ l.name = e.target.value; });
+      div.querySelector('.lbone').addEventListener('click', (e)=> e.stopPropagation());
       div.querySelector('.lbone').addEventListener('change', (e)=>{
         attachLayerToBone(l, e.target.value || null);
         renderAll();
       });
+      div.querySelector('.moveback').addEventListener('click', ()=>{ moveLayer(l,-1); });
+      div.querySelector('.movefront').addEventListener('click', ()=>{ moveLayer(l,1); });
       div.querySelector('.del').addEventListener('click', ()=>{
         state.layers = state.layers.filter(x=>x.id!==l.id);
         if(state.selectedLayerId===l.id) state.selectedLayerId=null;
         renderAll();
       });
       panelLayers.appendChild(div);
-    });
+    }
   }
+}
+
+function moveLayer(layer, dir){
+  const idx = state.layers.indexOf(layer);
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= state.layers.length) return;
+  const tmp = state.layers[idx];
+  state.layers[idx] = state.layers[newIdx];
+  state.layers[newIdx] = tmp;
+  renderAll();
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -492,6 +706,25 @@ function attachLayerToBone(layer, boneId){
   layer.offsetY = dx*s + dy*c;
   layer.offsetRot = layer.rotation - t.worldAngle;
   layer.boneId = boneId;
+}
+
+// ---------- bone hierarchy editing ----------
+function reparentBone(bone, newParentId){
+  if(newParentId === bone.id) return false;
+  if(newParentId){
+    const desc = getDescendantIds(bone.id);
+    if(desc.has(newParentId)){ alert("Can't parent a bone to its own descendant."); return false; }
+    if(!getBoneById(newParentId)) return false;
+  }
+  const world = computeWorldTransforms();
+  const t = world[bone.id];
+  const desiredWorldAngle = t.worldAngle;
+  let newParentWorldAngle = 0;
+  if(newParentId && world[newParentId]) newParentWorldAngle = world[newParentId].worldAngle;
+  bone.baseAngle = desiredWorldAngle - newParentWorldAngle - (bone.workingAngle||0);
+  if(!newParentId){ bone.x = t.x; bone.y = t.y; }
+  bone.parentId = newParentId || null;
+  return true;
 }
 
 // ---------- bone creation ----------
@@ -606,16 +839,181 @@ function poseIK(bone, mouseX, mouseY){
   bone.workingAngle = angleC_world - angleP_world - bone.baseAngle;
 }
 
+// ---------- skeleton templates ----------
+function tplBone(parentBone, rootX, rootY, tipX, tipY, name){
+  if(parentBone){
+    const w = computeWorldTransforms();
+    rootX = w[parentBone.id].tipX;
+    rootY = w[parentBone.id].tipY;
+  }
+  const b = addBone(parentBone ? parentBone.id : null, rootX, rootY, tipX, tipY);
+  b.name = name;
+  return b;
+}
+
+function buildBipedTemplate(cx, cy){
+  const pelvis = tplBone(null, cx, cy, cx, cy-20, 'Pelvis');
+  const spine  = tplBone(pelvis, 0,0, cx, cy-55, 'Spine');
+  tplBone(spine, 0,0, cx, cy-80, 'Head');
+  const lUp = tplBone(spine, 0,0, cx-40, cy-45, 'L Upper Arm');
+  const lFo = tplBone(lUp,   0,0, cx-70, cy-20, 'L Forearm');
+  tplBone(lFo, 0,0, cx-85, cy-5, 'L Hand');
+  const rUp = tplBone(spine, 0,0, cx+40, cy-45, 'R Upper Arm');
+  const rFo = tplBone(rUp,   0,0, cx+70, cy-20, 'R Forearm');
+  tplBone(rFo, 0,0, cx+85, cy-5, 'R Hand');
+  const lTh = tplBone(pelvis, 0,0, cx-15, cy+50, 'L Thigh');
+  const lSh = tplBone(lTh,    0,0, cx-18, cy+95, 'L Shin');
+  tplBone(lSh, 0,0, cx-30, cy+100, 'L Foot');
+  const rTh = tplBone(pelvis, 0,0, cx+15, cy+50, 'R Thigh');
+  const rSh = tplBone(rTh,    0,0, cx+18, cy+95, 'R Shin');
+  tplBone(rSh, 0,0, cx+30, cy+100, 'R Foot');
+  state.selectedBoneId = pelvis.id;
+}
+
+function buildQuadrupedTemplate(cx, cy){
+  const hips  = tplBone(null, cx, cy+8, cx, cy-8, 'Hips');
+  const spine = tplBone(hips, 0,0, cx+50, cy-8, 'Spine');
+  const chest = tplBone(spine,0,0, cx+90, cy-10, 'Chest');
+  const neck  = tplBone(chest,0,0, cx+115, cy-25, 'Neck');
+  tplBone(neck, 0,0, cx+140, cy-30, 'Head');
+
+  const t1 = tplBone(hips, 0,0, cx-30, cy-15, 'Tail 1');
+  const t2 = tplBone(t1,   0,0, cx-55, cy-25, 'Tail 2');
+  tplBone(t2, 0,0, cx-78, cy-38, 'Tail 3');
+
+  const fnU = tplBone(chest, 0,0, cx+85, cy+35, 'Front Near Upper Leg');
+  const fnL = tplBone(fnU,   0,0, cx+82, cy+75, 'Front Near Lower Leg');
+  tplBone(fnL, 0,0, cx+80, cy+90, 'Front Near Paw');
+
+  const ffU = tplBone(chest, 0,0, cx+96, cy+33, 'Front Far Upper Leg');
+  const ffL = tplBone(ffU,   0,0, cx+93, cy+73, 'Front Far Lower Leg');
+  tplBone(ffL, 0,0, cx+91, cy+88, 'Front Far Paw');
+
+  const bnU = tplBone(hips, 0,0, cx-5, cy+35, 'Back Near Upper Leg');
+  const bnL = tplBone(bnU,  0,0, cx-8, cy+75, 'Back Near Lower Leg');
+  tplBone(bnL, 0,0, cx-10, cy+90, 'Back Near Paw');
+
+  const bfU = tplBone(hips, 0,0, cx+6, cy+33, 'Back Far Upper Leg');
+  const bfL = tplBone(bfU,  0,0, cx+3, cy+73, 'Back Far Lower Leg');
+  tplBone(bfL, 0,0, cx+1, cy+88, 'Back Far Paw');
+
+  state.selectedBoneId = hips.id;
+}
+
+// generic chain extension -- used for both Tail and Limb Chain menu items,
+// and works from ANY existing bone (including ones dropped in from a template),
+// which is what lets you "build on" from an existing skeleton.
+function buildChainExtension(parentBone, segments, totalLength, curveDelta, namePrefix){
+  segments = clamp(Math.round(segments), 1, 16);
+  totalLength = clamp(totalLength, 8, 2000);
+  const segLen = totalLength / segments;
+  const w0 = computeWorldTransforms();
+  let angle = w0[parentBone.id].worldAngle;
+  let curX = w0[parentBone.id].tipX, curY = w0[parentBone.id].tipY;
+  let current = parentBone;
+  for(let i=0;i<segments;i++){
+    angle += curveDelta;
+    const nx = curX + Math.cos(angle)*segLen;
+    const ny = curY + Math.sin(angle)*segLen;
+    current = tplBone(current, 0,0, nx, ny, namePrefix + ' ' + (i+1));
+    curX = nx; curY = ny;
+  }
+  state.selectedBoneId = current.id;
+  return current;
+}
+
+// ---------- rig template menu wiring ----------
+document.querySelectorAll('#ddTemplates [data-tpl]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const type = btn.dataset.tpl;
+    document.getElementById('ddTemplates').classList.remove('open');
+    if(type === 'biped' || type === 'quadruped'){
+      state.pendingTemplate = type;
+      toolHint.textContent = "Click on the stage to place the " + type + " skeleton's root.";
+      stageEmpty.style.display = 'none';
+      return;
+    }
+    if(!state.selectedBoneId){ alert('Select a bone first -- the chain attaches to its tip.'); return; }
+    const parentBone = getBoneById(state.selectedBoneId);
+    if(!parentBone) return;
+    const segStr = prompt('How many segments?', '3');
+    if(segStr === null) return;
+    const lenStr = prompt('Total length in px?', '80');
+    if(lenStr === null) return;
+    const segments = parseInt(segStr,10) || 3;
+    const totalLength = parseFloat(lenStr) || 80;
+    if(type === 'tail'){
+      buildChainExtension(parentBone, segments, totalLength, 0.14, 'Tail');
+    } else {
+      buildChainExtension(parentBone, segments, totalLength, -0.03, 'Limb');
+    }
+    renderAll();
+  });
+});
+
+// ---------- background panel wiring ----------
+const bgColorInput = document.getElementById('bgColor');
+const bgFitRow = document.getElementById('bgFitRow');
+const bgFitSelect = document.getElementById('bgFit');
+bgColorInput.addEventListener('input', (e)=>{ state.background.color = e.target.value; renderStage(); });
+document.getElementById('btnBgImport').addEventListener('click', ()=> document.getElementById('fileBg').click());
+document.getElementById('fileBg').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{ state.background.img = img; state.background.src = reader.result; bgFitRow.style.display='flex'; renderAll(); };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+document.getElementById('btnBgClear').addEventListener('click', ()=>{
+  state.background.img = null; state.background.src = null;
+  bgFitRow.style.display = 'none';
+  renderAll();
+});
+bgFitSelect.addEventListener('change', (e)=>{ state.background.fit = e.target.value; renderStage(); });
+
+// ---------- grid + export-options panel wiring ----------
+document.getElementById('gridToggle').addEventListener('change', (e)=>{ state.showGrid = e.target.checked; renderStage(); });
+document.getElementById('optGrid').addEventListener('change', (e)=>{ state.exportOptions.includeGrid = e.target.checked; });
+document.getElementById('optBones').addEventListener('change', (e)=>{ state.exportOptions.includeBones = e.target.checked; });
+document.getElementById('optTransparent').addEventListener('change', (e)=>{ state.exportOptions.transparentBg = e.target.checked; });
+
+// ---------- camera ----------
+document.getElementById('btnResetView').addEventListener('click', ()=>{ state.camera.x = 0; state.camera.y = 0; renderStage(); camLabel.textContent = "X: 0  Y: 0"; });
+
 // ---------- mouse interaction ----------
 let drag = null;
 
 function stageCoords(e){
+  // returns WORLD coordinates (already camera-adjusted) -- everything else in the
+  // app (bone math, hit tests, addBone, etc) works in this single coordinate space.
   const r = stage.getBoundingClientRect();
-  return { x: e.clientX - r.left, y: e.clientY - r.top };
+  return { x: e.clientX - r.left + state.camera.x, y: e.clientY - r.top + state.camera.y };
 }
 
 stage.addEventListener('mousedown', (e)=>{
   const {x,y} = stageCoords(e);
+
+  if(state.pendingTemplate){
+    const type = state.pendingTemplate;
+    state.pendingTemplate = null;
+    if(type === 'biped') buildBipedTemplate(x,y);
+    else if(type === 'quadruped') buildQuadrupedTemplate(x,y);
+    toolHint.textContent = HINTS[state.tool];
+    renderAll();
+    return;
+  }
+
+  if(state.tool === 'pan'){
+    drag = { mode:'pan', startScreenX: e.clientX, startScreenY: e.clientY, origCamX: state.camera.x, origCamY: state.camera.y };
+    stage.classList.add('panning-cursor');
+    return;
+  }
+
   if(state.tool==='bone'){
     const parentBone = findNearestTip(x,y,14);
     let rootX=x, rootY=y;
@@ -644,6 +1042,15 @@ stage.addEventListener('mousedown', (e)=>{
 });
 
 stage.addEventListener('mousemove', (e)=>{
+  if(drag && drag.mode==='pan'){
+    const dxScreen = e.clientX - drag.startScreenX;
+    const dyScreen = e.clientY - drag.startScreenY;
+    state.camera.x = drag.origCamX - dxScreen;
+    state.camera.y = drag.origCamY - dyScreen;
+    renderStage();
+    camLabel.textContent = "X: " + Math.round(state.camera.x) + "  Y: " + Math.round(state.camera.y);
+    return;
+  }
   const {x,y} = stageCoords(e);
   if(creating){
     creating.curX = x; creating.curY = y;
@@ -670,14 +1077,25 @@ window.addEventListener('mouseup', (e)=>{
     creating = null;
     renderAll();
   }
+  if(drag && drag.mode==='pan'){ stage.classList.remove('panning-cursor'); }
   drag = null;
 });
 
 stage.addEventListener('wheel', (e)=>{
-  if(state.tool==='sprite' && state.selectedLayerId){
+  if(state.tool === 'sprite' && state.selectedLayerId && !e.shiftKey){
     e.preventDefault();
     const l = state.layers.find(x=>x.id===state.selectedLayerId);
     if(l){ l.scale = clamp(l.scale * (e.deltaY<0 ? 1.06 : 0.94), 0.05, 8); renderStage(); }
+    return;
+  }
+  // horizontal-scroll camera: trackpad horizontal swipe, or shift+wheel as the universal fallback
+  const horizontalDelta = e.shiftKey ? e.deltaY : e.deltaX;
+  if(Math.abs(horizontalDelta) > 0 || Math.abs(e.deltaX) > Math.abs(e.deltaY)){
+    e.preventDefault();
+    state.camera.x += horizontalDelta;
+    if(!e.shiftKey) state.camera.y += 0; // vertical trackpad component ignored to keep the scroll purely horizontal by default
+    renderStage();
+    camLabel.textContent = "X: " + Math.round(state.camera.x) + "  Y: " + Math.round(state.camera.y);
   }
 }, {passive:false});
 
@@ -770,12 +1188,17 @@ document.getElementById('btnNew').addEventListener('click', ()=>{
   state.bones = []; state.layers = []; state.keyframes = {};
   state.selectedBoneId = null; state.selectedLayerId = null;
   state.currentFrame = 0;
+  state.camera.x = 0; state.camera.y = 0;
   renderAll();
 });
 
 document.getElementById('btnSave').addEventListener('click', ()=>{
   const data = {
     fps: state.fps, duration: state.duration,
+    camera: state.camera,
+    showGrid: state.showGrid,
+    background: { color: state.background.color, src: state.background.src, fit: state.background.fit },
+    exportOptions: state.exportOptions,
     bones: state.bones.map(b=>({id:b.id,name:b.name,parentId:b.parentId,length:b.length,baseAngle:b.baseAngle,x:b.x,y:b.y,color:b.color})),
     layers: state.layers.map(l=>({id:l.id,name:l.name,src:l.src,x:l.x,y:l.y,rotation:l.rotation,scale:l.scale,width:l.width,height:l.height,boneId:l.boneId,offsetX:l.offsetX,offsetY:l.offsetY,offsetRot:l.offsetRot,visible:l.visible})),
     keyframes: state.keyframes,
@@ -797,6 +1220,30 @@ document.getElementById('fileLoad').addEventListener('change', (e)=>{
       state.duration = data.duration || 48;
       document.getElementById('fpsInput').value = state.fps;
       document.getElementById('durInput').value = state.duration;
+
+      state.camera = data.camera || { x:0, y:0 };
+      state.showGrid = data.showGrid !== undefined ? data.showGrid : true;
+      document.getElementById('gridToggle').checked = state.showGrid;
+
+      state.exportOptions = data.exportOptions || { includeGrid:false, includeBones:false, transparentBg:false };
+      document.getElementById('optGrid').checked = !!state.exportOptions.includeGrid;
+      document.getElementById('optBones').checked = !!state.exportOptions.includeBones;
+      document.getElementById('optTransparent').checked = !!state.exportOptions.transparentBg;
+
+      const bgData = data.background || { color:'#14110f', src:null, fit:'cover' };
+      state.background = { color: bgData.color || '#14110f', img:null, src: bgData.src || null, fit: bgData.fit || 'cover' };
+      bgColorInput.value = state.background.color;
+      bgFitSelect.value = state.background.fit;
+      if(state.background.src){
+        const bgImg = new Image();
+        bgImg.onload = renderAll;
+        bgImg.src = state.background.src;
+        state.background.img = bgImg;
+        bgFitRow.style.display = 'flex';
+      } else {
+        bgFitRow.style.display = 'none';
+      }
+
       state.layers = [];
       (data.layers||[]).forEach(l=>{
         const img = new Image();
@@ -827,7 +1274,7 @@ document.getElementById('fileImg').addEventListener('change', (e)=>{
       const layer = {
         id: uid(), name: file.name.replace(/\.[^.]+$/,''),
         img, src: reader.result,
-        x: stage.width/2, y: stage.height/2, rotation:0, scale:1,
+        x: state.camera.x + stage.width/2, y: state.camera.y + stage.height/2, rotation:0, scale:1,
         width: img.naturalWidth*scaleFit, height: img.naturalHeight*scaleFit,
         boneId: null, offsetX:0, offsetY:0, offsetRot:0, visible:true,
       };
@@ -843,7 +1290,11 @@ document.getElementById('fileImg').addEventListener('change', (e)=>{
 });
 
 document.getElementById('btnExportPng').addEventListener('click', ()=>{
-  stage.toBlob(blob=>{ downloadBlob(blob, 'motion-engine-frame-'+state.currentFrame+'.png'); }, 'image/png');
+  renderStage({forExport:true});
+  stage.toBlob(blob=>{
+    downloadBlob(blob, 'motion-engine-frame-'+state.currentFrame+'.png');
+    renderAll();
+  }, 'image/png');
 });
 
 document.getElementById('btnExportVideo').addEventListener('click', ()=>{
@@ -865,6 +1316,7 @@ document.getElementById('btnExportVideo').addEventListener('click', ()=>{
   recorder.onstop = ()=>{
     const blob = new Blob(chunks, {type:'video/webm'});
     downloadBlob(blob, 'motion-engine-export.webm');
+    renderAll();
     if(wasPlaying){ state.playing=true; document.getElementById('btnPlay').textContent='⏸ Pause'; startPlayback(); }
   };
   recorder.start();
@@ -873,7 +1325,7 @@ document.getElementById('btnExportVideo').addEventListener('click', ()=>{
   const step = ()=>{
     state.currentFrame = f;
     applyPoseForFrame(f);
-    renderAll();
+    renderStage({forExport:true});
     f++;
     if(f < state.duration){ setTimeout(step, frameDuration); }
     else { setTimeout(()=>recorder.stop(), frameDuration + 250); }
@@ -887,7 +1339,6 @@ function buildDemoRig(){
   const shoulder = addBone(null, cx, cy, cx+90, cy-10);
   shoulder.name = 'Upper Arm';
   const elbow = addBone(shoulder.id, 0,0, 0,0);
-  // manually recompute proper tip using world transform since addBone needs on-screen coords
   const w1 = computeWorldTransforms();
   const forearmTip = { x: w1[shoulder.id].tipX + 80, y: w1[shoulder.id].tipY + 25 };
   elbow.length = dist(w1[shoulder.id].tipX, w1[shoulder.id].tipY, forearmTip.x, forearmTip.y);
